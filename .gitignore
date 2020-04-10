@@ -44,3 +44,6 @@ out/
 .idea_modules/
 
 *.iml
+
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
