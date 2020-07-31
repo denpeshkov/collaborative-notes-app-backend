@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.config.server.EnableConfigServer;
 
-/** Service that manages configurations fot other services */
+/** Service that manages configurations for other services */
 @SpringBootApplication
 @EnableConfigServer
 public class ConfigServer {
