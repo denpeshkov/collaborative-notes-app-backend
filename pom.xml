@@ -14,4 +14,9 @@
         <maven.compiler.source>11</maven.compiler.source>
     </properties>
 
+    <modules>
+        <module>config-server</module>
+        <module>service-registry</module>
+    </modules>
+
 </project>

@@ -1,0 +1,14 @@
+server:
+  port: 8888 # port on which config-server starts
+
+spring:
+  application:
+    name: config-server # name of service
+  profiles:
+    active: default # active profiles
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/DenPeshkov/collaborative-notes-app-configs.git # url of repository with config files
+          timeout: 10 # timeout in seconds to connect to repository
