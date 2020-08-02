@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 
-/** Main class of service-registry */
+/** Service that manages instances of other services, locate them, health-check */
 @SpringBootApplication
 @EnableEurekaServer
 public class ServiceRegistry {
