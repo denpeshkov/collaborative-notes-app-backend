@@ -36,4 +36,8 @@
         </dependencies>
     </dependencyManagement>
 
+    <modules>
+        <module>authentication-service</module>
+    </modules>
+
 </project>
