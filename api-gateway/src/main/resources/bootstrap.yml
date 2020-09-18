@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: api-gateway # name of service
+  cloud:
+    config:
+      uri: http://localhost:8888/ # url of config-service
+      fail-fast: true # fails if cannot connect to config-service
+  profiles:
+    active: zuul # active profiles
