@@ -38,6 +38,7 @@
 
     <modules>
         <module>config-server</module>
+        <module>service-registry</module>
     </modules>
 
 </project>
