@@ -41,8 +41,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             new JwtTokenAuthenticationFilter(jwtConfig), UsernamePasswordAuthenticationFilter.class)
         // authorization requests config
         .authorizeRequests()
-        // allow all who are accessing "auth" service
-        .antMatchers(HttpMethod.POST, "/login/**")
+        // allow all who are accessing authentication-service
+        .antMatchers(HttpMethod.POST, "/authentication-service")
         .permitAll()
         // Any other request must be authenticated
         .anyRequest()

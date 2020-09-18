@@ -18,6 +18,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+/**
+ * Filter used to authenticate users who have JWT token prior to previous login request to
+ * application
+ */
 public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtConfig jwtConfig;
@@ -88,6 +92,10 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
     chain.doFilter(request, response);
   }
 
+  /** Validates JWT token
+   * @param claims claims of JWT token
+   * @return true if valid, false if invalid
+   */
   private boolean validate(Claims claims) {
     String issuer = claims.getIssuer();
     String username = claims.getSubject();
