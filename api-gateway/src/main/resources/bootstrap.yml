@@ -5,5 +5,6 @@ spring:
     config:
       uri: http://localhost:8888/ # url of config-service
       fail-fast: true # fails if cannot connect to config-service
+      name: api-gateway,jwt-security # what configurations to include
   profiles:
     active: zuul # active profiles

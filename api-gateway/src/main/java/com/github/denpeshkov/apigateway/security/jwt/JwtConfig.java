@@ -1,15 +1,15 @@
 package com.github.denpeshkov.apigateway.security.jwt;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotBlank;
 import java.time.Period;
 
 /** Configurations for JWT tokens */
+@Configuration
 @ConfigurationProperties(prefix = "security.jwt")
-@ConstructorBinding
 @Validated
 public class JwtConfig {
   /** Authorization header */
@@ -23,6 +23,22 @@ public class JwtConfig {
 
   /** Token secret */
   @NotBlank private String secret;
+
+  public void setHeader(String header) {
+    this.header = header;
+  }
+
+  public void setSchema(String schema) {
+    this.schema = schema;
+  }
+
+  public void setExpirationPeriod(Period expirationPeriod) {
+    this.expirationPeriod = expirationPeriod;
+  }
+
+  public void setSecret(String secret) {
+    this.secret = secret;
+  }
 
   public String getHeader() {
     return header;
