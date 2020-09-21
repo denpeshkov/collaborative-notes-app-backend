@@ -11,6 +11,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.crypto.SecretKey;
 import javax.servlet.FilterChain;
@@ -23,18 +24,20 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
-/** Filter used to authenticate user and sent JWT token after successful authentication */
-public class JwtUsernameAndPasswordAuthenticationFilter
-    extends UsernamePasswordAuthenticationFilter {
+/** Filter used to authenticate (login) user and sent JWT token after successful authentication */
+public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
   private static final ObjectMapper mapper = new ObjectMapper();
   private final AuthenticationManager authManager;
   private final JwtConfig jwtConfig;
 
-  public JwtUsernameAndPasswordAuthenticationFilter(
-      AuthenticationManager authManager, JwtConfig jwtConfig) {
+  public JwtLoginFilter(AuthenticationManager authManager, JwtConfig jwtConfig) {
     this.authManager = authManager;
     this.jwtConfig = jwtConfig;
+
+    // By default, UsernamePasswordAuthenticationFilter listens to "/login" path.
+    // In our case, we use "/login". So, we need to override the defaults.
+    this.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/login", "POST"));
   }
 
   /**
