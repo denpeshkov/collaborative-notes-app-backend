@@ -8,3 +8,9 @@ spring:
       name: authentication-service, jwt-security
   profiles:
     active: test # active profiles
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
