@@ -15,6 +15,13 @@
     </parent>
 
     <dependencies>
+        <!--commons-->
+        <dependency>
+            <groupId>com.github.DenPeshkov</groupId>
+            <artifactId>commons</artifactId>
+            <version>1.0</version>
+        </dependency>
+
         <!--configuration processor-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
