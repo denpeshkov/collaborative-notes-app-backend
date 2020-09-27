@@ -3,24 +3,24 @@ package com.github.denpeshkov.apigateway.security.security;
 import com.github.denpeshkov.apigateway.security.jwt.JwtConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.crypto.SecretKey;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 /**
- * Filter used to authenticate users who have JWT token prior to previous login request to
- * application
+ * Filter used to authenticate users who have JWT token due to previous login request to application
  */
 public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
 
@@ -57,12 +57,12 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
 
     try { // exceptions might be thrown in creating the claims if for example the token is expired
       // 4. Validate the token
+
+      SecretKey secretKey =
+          Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));
+
       Claims claims =
-          Jwts.parserBuilder()
-              .setSigningKey(jwtConfig.getSecret())
-              .build()
-              .parseClaimsJws(token)
-              .getBody();
+          Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
 
       if (validate(claims)) {
 
@@ -73,10 +73,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
         // SimpleGrantedAuthority is an implementation of that interface
         UsernamePasswordAuthenticationToken auth =
             new UsernamePasswordAuthenticationToken(
-                claims.getSubject(),
-                null,
-                ((Collection<String>) claims.get("authorities"))
-                    .stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
+                claims.getSubject(), null, Collections.emptySet());
 
         // 6. Authenticate the user
         // Now, user is authenticated
@@ -92,7 +89,9 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
     chain.doFilter(request, response);
   }
 
-  /** Validates JWT token
+  /**
+   * Validates JWT token
+   *
    * @param claims claims of JWT token
    * @return true if valid, false if invalid
    */
