@@ -9,9 +9,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
+
+import java.util.Collections;
 
 /** Spring Security configuration */
 @EnableWebSecurity // Enable security config. This annotation denotes config for spring security.
@@ -24,7 +28,7 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
   @Autowired
   public WebSecurityConfigurer(
-      @Qualifier("userDetailsServiceImpl") UserDetailsService userDetailsService,
+      @Qualifier("inMemoryUserDetailsManager") UserDetailsService userDetailsService,
       JwtConfig jwtConfig,
       AuthenticationEntryPoint authenticationEntryPoint,
       BCryptPasswordEncoder passwordEncoder) {
@@ -52,8 +56,7 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
         // An object provided by WebSecurityConfigurerAdapter, used to authenticate the user passing
         // user's credentials
         // The filter needs this auth manager to authenticate the user.
-        .addFilter(
-            new JwtLoginFilter(authenticationManager(), jwtConfig))
+        .addFilter(new JwtLoginFilter(authenticationManager(), jwtConfig))
         .authorizeRequests()
         // allow all POST requests
         .antMatchers(HttpMethod.POST, "/login/**")
@@ -70,6 +73,9 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
   // verify passwords.
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    ((UserDetailsManager) userDetailsService)
+        .createUser(new User("aaa", passwordEncoder.encode("aaa"), Collections.emptyList()));
+
     auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
   }
 }

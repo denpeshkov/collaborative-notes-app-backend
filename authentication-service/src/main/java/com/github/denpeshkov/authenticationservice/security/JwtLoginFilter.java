@@ -2,6 +2,7 @@ package com.github.denpeshkov.authenticationservice.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.denpeshkov.authenticationservice.jwt.JwtConfig;
+import com.github.denpeshkov.authenticationservice.user.UserCredentials;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,7 +10,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -37,7 +37,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     // By default, UsernamePasswordAuthenticationFilter listens to "/login" path.
     // In our case, we use "/login". So, we need to override the defaults.
-    this.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/login", "POST"));
+    this.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/login/**", "POST"));
   }
 
   /**
@@ -54,7 +54,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     try {
       // 1. Get credentials from request
-      User creds = mapper.readValue(request.getInputStream(), User.class);
+      UserCredentials creds = mapper.readValue(request.getInputStream(), UserCredentials.class);
 
       // 2. Create auth object (contains credentials) which will be used by auth manager
       UsernamePasswordAuthenticationToken authToken =
@@ -106,6 +106,6 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
             .compact();
 
     // Add token to header
-    response.addHeader(jwtConfig.getHeader(), jwtConfig.getSchema() + token);
+    response.addHeader(jwtConfig.getHeader(), jwtConfig.getSchema() + " " + token);
   }
 }
