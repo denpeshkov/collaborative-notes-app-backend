@@ -53,16 +53,12 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
       HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
     try {
-      // 1. Get credentials from request
       UserCredentials creds = mapper.readValue(request.getInputStream(), UserCredentials.class);
 
-      // 2. Create auth object (contains credentials) which will be used by auth manager
       UsernamePasswordAuthenticationToken authToken =
           new UsernamePasswordAuthenticationToken(
               creds.getUsername(), creds.getPassword(), Collections.emptyList());
 
-      // 3. Authentication manager authenticate the user, and use
-      // UserDetialsServiceImpl::loadUserByUsername() method to load the user.
       return authManager.authenticate(authToken);
 
     } catch (IOException e) {
@@ -94,8 +90,6 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
             .setSubject(auth.getName())
             .setIssuer("collaborative-notes-app")
             .setIssuedAt(Date.from(now))
-            // Convert to list of strings.
-            // This is important because it affects the way we get them back in the Gateway.
             .claim(
                 "authorities",
                 auth.getAuthorities().stream()

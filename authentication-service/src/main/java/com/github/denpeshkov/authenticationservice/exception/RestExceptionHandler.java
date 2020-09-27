@@ -16,6 +16,14 @@ import java.nio.file.AccessDeniedException;
 @RestControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
+  /**
+   * Customize the response for {@link AccessDeniedException}.
+   *
+   * <p>This method delegates to {@link #handleExceptionInternal}.
+   *
+   * @param exception the exception
+   * @return a {@link ResponseEntity} instance
+   */
   @ExceptionHandler(AccessDeniedException.class)
   protected ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException exception) {
     RestExceptionResponse exceptionResponse =
@@ -26,6 +34,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         exception, exceptionResponse, null, exceptionResponse.getStatus(), null);
   }
 
+  /**
+   * Customize the response for {@link AuthenticationException}.
+   *
+   * <p>This method delegates to {@link #handleExceptionInternal}.
+   *
+   * @param exception the exception
+   * @return a {@link ResponseEntity} instance
+   */
   @ExceptionHandler(AuthenticationException.class)
   protected ResponseEntity<Object> handleAuthenticationException(
       AuthenticationException exception) {

@@ -10,13 +10,19 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
+/** Represent user's credentials during authentication and registration */
 @JsonIgnoreProperties(
     ignoreUnknown = true,
     value = {"authorities"},
     allowGetters = true)
 public class UserCredentials {
+  /** user's username */
   private final String username;
+
+  /** user's password */
   private final String password;
+
+  /** user's roles */
   @JsonRawValue private final Set<GrantedAuthority> authorities;
 
   @JsonCreator
