@@ -26,23 +26,17 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
     http.csrf()
         .disable()
-        // make sure we use stateless session; session won't be used to store user's state.
         .sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
-        // handle an authorized attempts
         .exceptionHandling()
         .authenticationEntryPoint(authenticationEntryPoint)
         .and()
-        // Add a filter to validate the tokens with every request
         .addFilterAfter(
             new JwtTokenAuthenticationFilter(jwtConfig), UsernamePasswordAuthenticationFilter.class)
-        // authorization requests config
         .authorizeRequests()
-        // allow all who are accessing authentication-service
         .antMatchers(HttpMethod.POST, "/authentication-service")
         .permitAll()
-        // Any other request must be authenticated
         .anyRequest()
         .authenticated();
   }
