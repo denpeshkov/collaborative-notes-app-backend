@@ -1,6 +1,7 @@
 package com.github.denpeshkov.authenticationservice.security;
 
 import com.github.denpeshkov.authenticationservice.exception.RestAuthenticationEntryPoint;
+import com.github.denpeshkov.commons.security.jwt.JwtConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,5 +20,10 @@ public class SecurityConfig {
   AuthenticationEntryPoint authenticationEntryPoint(
       @Qualifier("handlerExceptionResolver") HandlerExceptionResolver exceptionResolver) {
     return new RestAuthenticationEntryPoint(exceptionResolver);
+  }
+
+  @Bean
+  JwtConfig jwtConfig() {
+    return new JwtConfig();
   }
 }

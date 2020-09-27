@@ -1,6 +1,6 @@
 package com.github.denpeshkov.authenticationservice.security;
 
-import com.github.denpeshkov.authenticationservice.jwt.JwtConfig;
+import com.github.denpeshkov.commons.security.jwt.JwtConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;

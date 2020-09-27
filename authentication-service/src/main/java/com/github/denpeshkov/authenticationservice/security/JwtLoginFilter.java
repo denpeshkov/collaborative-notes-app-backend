@@ -1,8 +1,8 @@
 package com.github.denpeshkov.authenticationservice.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.denpeshkov.authenticationservice.jwt.JwtConfig;
 import com.github.denpeshkov.authenticationservice.user.UserCredentials;
+import com.github.denpeshkov.commons.security.jwt.JwtConfig;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.authentication.AuthenticationManager;
