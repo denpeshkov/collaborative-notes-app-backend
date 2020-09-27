@@ -1,6 +1,6 @@
 package com.github.denpeshkov.apigateway.security.security;
 
-import com.github.denpeshkov.apigateway.security.jwt.JwtConfig;
+import com.github.denpeshkov.commons.security.jwt.JwtConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

@@ -1,6 +1,6 @@
 package com.github.denpeshkov.apigateway.security.security;
 
-import com.github.denpeshkov.apigateway.security.jwt.JwtConfig;
+import com.github.denpeshkov.commons.security.jwt.JwtConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
