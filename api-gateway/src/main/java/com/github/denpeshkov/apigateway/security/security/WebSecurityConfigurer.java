@@ -2,8 +2,10 @@ package com.github.denpeshkov.apigateway.security.security;
 
 import com.github.denpeshkov.commons.security.jwt.JwtConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -39,5 +41,10 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
         .permitAll()
         .anyRequest()
         .authenticated();
+  }
+
+  @Override
+  public void configure(WebSecurity web) throws Exception {
+    web.ignoring().requestMatchers(EndpointRequest.toAnyEndpoint());
   }
 }
