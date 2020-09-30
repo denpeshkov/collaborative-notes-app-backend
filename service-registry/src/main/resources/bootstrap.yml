@@ -7,3 +7,7 @@ spring:
       fail-fast: true # fails if cannot connect to config-service
   profiles:
     active: eureka # active profiles
+
+eureka:
+  server:
+    enable-self-preservation: false
