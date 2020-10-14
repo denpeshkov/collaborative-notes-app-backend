@@ -8,6 +8,9 @@ spring:
       name: authentication-service,  service-registry-client, jwt-security
   profiles:
     active: test, eureka # active profiles
+  h2:
+    console:
+      enabled: true
 
 logging:
   level:
