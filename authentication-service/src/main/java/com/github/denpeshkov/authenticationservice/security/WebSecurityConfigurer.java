@@ -3,21 +3,14 @@ package com.github.denpeshkov.authenticationservice.security;
 import com.github.denpeshkov.commons.security.jwt.JwtConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
-
-import java.util.Collections;
 
 /** Spring Security configuration */
 @EnableWebSecurity // Enable security config. This annotation denotes config for spring security.
@@ -30,7 +23,7 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
   @Autowired
   public WebSecurityConfigurer(
-      @Qualifier("inMemoryUserDetailsManager") UserDetailsService userDetailsService,
+      @Qualifier("userService") UserDetailsService userDetailsService,
       JwtConfig jwtConfig,
       AuthenticationEntryPoint authenticationEntryPoint,
       BCryptPasswordEncoder passwordEncoder) {
@@ -52,22 +45,21 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
         .and()
         .addFilter(new JwtLoginFilter(authenticationManager(), jwtConfig))
         .authorizeRequests()
-        .antMatchers(HttpMethod.POST, "/login/**")
+        // предоставить доступ к login и signup и actuator endpoints
+        .antMatchers("/login/**", "/signup", "/actuator/**")
         .permitAll()
         .anyRequest()
         .authenticated();
   }
 
-  @Override
-  public void configure(WebSecurity web) throws Exception {
+  /*  @Override
+  public void configure(WebSecurity web) {
+    // предоставить доступ к actuator endpoints
     web.ignoring().requestMatchers(EndpointRequest.toAnyEndpoint());
-  }
+  }*/
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    ((UserDetailsManager) userDetailsService)
-        .createUser(new User("aaa", passwordEncoder.encode("aaa"), Collections.emptyList()));
-
     auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
   }
 }

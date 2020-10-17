@@ -3,7 +3,6 @@ package com.github.denpeshkov.authenticationservice.user;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonRawValue;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.annotation.Transient;
@@ -11,6 +10,7 @@ import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.validation.constraints.NotBlank;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -22,15 +22,17 @@ public class UserCredentials {
   /** Id used to persists entity in DB */
   private @Id Long id;
   /** user's username */
+  @NotBlank(message = "username should not be empty")
   private String username;
   /** user's password */
+  @NotBlank(message = "password should not be empty")
   private String password;
   /**
    * user's roles
    *
    * <p><b>not used at the moment !!! so {@link Transient}
    */
-  @JsonRawValue @Transient private Set<SimpleGrantedAuthority> authorities;
+  @Transient private Set<SimpleGrantedAuthority> authorities;
 
   /**
    * Creates entity from {@link UserDetails} instance to work with Spring Security abstractions
@@ -44,7 +46,7 @@ public class UserCredentials {
   }
 
   @JsonCreator
-  @PersistenceConstructor
+  @PersistenceConstructor // constructor used to persist entity
   public UserCredentials(
       @JsonProperty("username") String username, @JsonProperty("password") String password) {
     this.username = username;
@@ -52,7 +54,6 @@ public class UserCredentials {
     authorities = Collections.emptySet();
   }
 
-  // constructor used to persist entity
   public UserCredentials(
       String username, String password, Set<SimpleGrantedAuthority> authorities) {
     this.username = username;

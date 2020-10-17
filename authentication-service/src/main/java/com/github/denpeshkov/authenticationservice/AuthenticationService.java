@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Service used to authenticate (register) users */
 @SpringBootApplication
-@RestController
 public class AuthenticationService {
 
   /**

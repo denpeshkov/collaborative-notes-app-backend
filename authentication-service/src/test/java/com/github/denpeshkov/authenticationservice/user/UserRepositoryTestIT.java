@@ -10,8 +10,8 @@ import org.springframework.test.context.TestPropertySource;
 import java.util.Set;
 
 @DataJdbcTest
-@TestPropertySource(locations = "/bootstrap.yml")
-class UserRepositoryIntegrationTest {
+@TestPropertySource("/bootstrap.yml")
+class UserRepositoryTestIT {
 
   @Autowired private UserRepository userRepository;
 
