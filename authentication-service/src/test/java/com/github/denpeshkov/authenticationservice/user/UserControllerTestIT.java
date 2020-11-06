@@ -1,9 +1,11 @@
 package com.github.denpeshkov.authenticationservice.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.denpeshkov.authenticationservice.exception.RestExceptionHandler;
+import com.github.denpeshkov.authenticationservice.exception.UserAlreadyExistsException;
+import com.github.denpeshkov.authenticationservice.security.JWTService;
 import com.github.denpeshkov.authenticationservice.security.SecurityConfig;
-import com.github.denpeshkov.authenticationservice.security.SimpleGrantedAuthorityMixin;
-import org.junit.jupiter.api.BeforeAll;
+import com.github.denpeshkov.commons.security.jwt.JwtConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -15,19 +17,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 
-import java.util.Set;
+import java.time.Period;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -35,13 +35,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(UserController.class)
 @TestPropertySource("/bootstrap.yml")
 @ExtendWith(MockitoExtension.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, RestExceptionHandler.class, JWTService.class})
 class UserControllerTestIT {
   @MockBean(name = "userService")
   private UserService userService;
 
+  @MockBean private JwtConfig jwtConfig;
+
   @Autowired private MockMvc mockMvc;
-  @Captor ArgumentCaptor<User> userCaptor;
+  @Autowired private JWTService jwtService;
+  @Captor ArgumentCaptor<UserCredentials> userCaptor;
 
   // used to emulate browser send JSON requests
   private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -56,11 +59,39 @@ class UserControllerTestIT {
         assertTrue(result.getResolvedException() instanceof HttpMessageNotReadableException);
   }
 
-  @BeforeAll
-  static void beforeAll() {
-    // adds Mix-In for given object mapper to use in "browser"
-    // Spring registers our SimpleGrantedAuthorityMixin to use for serialization and deserialization
-    objectMapper.addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityMixin.class);
+  @Test
+  void registerUser() throws Exception {
+    UserCredentials userCredentials = new UserCredentials("root", "root");
+
+    mockMvc
+        .perform(
+            post("/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userCredentials)))
+        .andExpect(status().isCreated())
+        .andDo(print());
+
+    verify(userService, times(1)).createUser(userCaptor.capture());
+    assertEquals(userCaptor.getValue(), userCredentials);
+  }
+
+  @Test
+  void registerUserWhenAlreadyExists() throws Exception {
+    UserCredentials userCredentials = new UserCredentials("root", "root");
+
+    doThrow(
+            new UserAlreadyExistsException(
+                "Cannot create a user with given username: root! User with given username already exists!"))
+        .when(userService)
+        .createUser(any());
+
+    mockMvc
+        .perform(
+            post("/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userCredentials)))
+        .andExpect(status().isUnauthorized())
+        .andDo(print());
   }
 
   @Test
@@ -118,51 +149,40 @@ class UserControllerTestIT {
   }
 
   @Test
-  void registerUser_WhenPostRequestWithAuthorities() throws Exception {
-    UserCredentials userCredentials =
-        new UserCredentials(
-            "root",
-            "root",
-            Set.of(new SimpleGrantedAuthority("ADMIN"), new SimpleGrantedAuthority("USER")));
+  void loginUser() throws Exception {
+    UserCredentials userCredentials = new UserCredentials("root", "root");
 
-    User user =
-        new User(
-            userCredentials.getUsername(),
-            userCredentials.getPassword(),
-            userCredentials.getAuthorities());
+    when(jwtConfig.getSecret()).thenReturn("secrettousewithjwttokenforautentication");
+    when(jwtConfig.getExpirationPeriod()).thenReturn(Period.ofDays(1));
+    when(jwtConfig.getHeader()).thenReturn("Authorization");
+    when(jwtConfig.getSchema()).thenReturn("Bearer");
 
     mockMvc
         .perform(
-            post("/signup")
-                .content(objectMapper.writeValueAsString(userCredentials))
+            post("/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isCreated())
+                .content(objectMapper.writeValueAsString(userCredentials)))
+        .andExpect(status().isOk())
+        .andExpect(MockMvcResultMatchers.header().exists("Authorization"))
         .andDo(print());
-
-    verify(userService, times(1)).createUser(userCaptor.capture());
-    assertEquals(userCaptor.getValue(), user);
   }
 
   @Test
-  void registerUser_WhenPostRequestWithoutAuthorities() throws Exception {
-    UserCredentials userCredentials = new UserCredentials("root", "root");
-    User user =
-        new User(
-            userCredentials.getUsername(),
-            userCredentials.getPassword(),
-            userCredentials.getAuthorities());
+  void loginUser_WhenPostRequestWithIncorrectBody() throws Exception {
+    mockMvc
+        .perform(post("/login"))
+        .andExpect(status().isBadRequest())
+        .andExpect(httpMessageNotReadableExceptionResultMatcher())
+        .andDo(print());
 
     mockMvc
         .perform(
-            post("/signup")
+            post("/login")
+                .content("{\"someField\":\"someValue\"}")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userCredentials)))
-        .andExpect(status().isCreated())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest())
         .andDo(print());
-
-    verify(userService, times(1)).createUser(userCaptor.capture());
-    assertEquals(userCaptor.getValue(), user);
   }
 
   @Test
