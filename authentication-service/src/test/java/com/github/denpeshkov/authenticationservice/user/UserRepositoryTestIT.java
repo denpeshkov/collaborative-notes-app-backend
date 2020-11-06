@@ -11,7 +11,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJdbcTest
-@TestPropertySource("/bootstrap.yml")
 class UserRepositoryTestIT {
 
   @Autowired private UserRepository userRepository;
