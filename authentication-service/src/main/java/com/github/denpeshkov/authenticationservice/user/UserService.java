@@ -1,16 +1,17 @@
 package com.github.denpeshkov.authenticationservice.user;
 
+import com.github.denpeshkov.authenticationservice.exception.IncorrectPasswordException;
+import com.github.denpeshkov.authenticationservice.exception.UserAlreadyExistsException;
+import com.github.denpeshkov.authenticationservice.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 
-/** Loads and creates user-specific authentication (security) data */
+import java.util.Optional;
+
+/** User's management for authentication and security */
 @Service
-public class UserService implements UserDetailsManager {
+public class UserService {
   private final UserRepository userRepository;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -20,9 +21,52 @@ public class UserService implements UserDetailsManager {
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
   }
 
-  @Override
-  public void createUser(UserDetails user) {
-    UserCredentials userCredentials = new UserCredentials(user);
+  /**
+   * Gets user by username
+   *
+   * @param username username
+   * @return {@link Optional} of user with given username
+   * @throws UserNotFoundException if user with given username doesn't exist
+   */
+  public UserCredentials getUser(String username) throws UserNotFoundException {
+    Optional<UserCredentials> userOptional = userRepository.findByUsername(username);
+    if (userOptional.isEmpty())
+      throw new UserNotFoundException(
+          String.format("User with given username: %s is not found!", username));
+
+    return userOptional.get();
+  }
+
+  /**
+   * Verifies that user with given username and password exists
+   *
+   * @param userCredentials user's credentials
+   * @throws UserNotFoundException if user with given username is not found
+   * @throws IncorrectPasswordException if password is incorrect
+   */
+  public void verifyUser(UserCredentials userCredentials)
+      throws UserNotFoundException, IncorrectPasswordException {
+    UserCredentials user = getUser(userCredentials.getUsername());
+
+    if (!bCryptPasswordEncoder.matches(userCredentials.getPassword(), user.getPassword()))
+      throw new IncorrectPasswordException(
+          String.format(
+              "Incorrect password for user with username: %s!", userCredentials.getUsername()));
+  }
+
+  /**
+   * Creates a new user if user with given username doesn't already exists
+   *
+   * @param userCredentials user credential's
+   * @throws UserAlreadyExistsException if user with given username already exists
+   */
+  // TODO transactions
+  public void createUser(UserCredentials userCredentials) throws UserAlreadyExistsException {
+    if (userExists(userCredentials.getUsername()))
+      throw new UserAlreadyExistsException(
+          String.format(
+              "Cannot create a user with given username: %s! User with given username already exists!",
+              userCredentials.getUsername()));
 
     // encrypt password prior to saving to database
     userCredentials.setPassword(bCryptPasswordEncoder.encode(userCredentials.getPassword()));
@@ -31,59 +75,52 @@ public class UserService implements UserDetailsManager {
   }
 
   /**
-   * Updates user's password
+   * Updates user
    *
-   * @param user user with new password
+   * @param userCredentials new user credential's
    */
-  @Override
-  public void updateUser(UserDetails user) {
-    UserCredentials userCredentials = new UserCredentials(user);
+  public void updateUser(UserCredentials userCredentials) throws UserNotFoundException {
+    // copy of userCredentials
+    UserCredentials newUser = new UserCredentials(userCredentials);
+
+    Optional<UserCredentials> userToUpdate =
+        userRepository.findByUsername(userCredentials.getUsername());
+
+    if (userToUpdate.isEmpty())
+      throw new UserNotFoundException(
+          String.format(
+              "User with given username: %s is not found!", userCredentials.getUsername()));
 
     // encrypt password prior to saving to database
-    userCredentials.setPassword(bCryptPasswordEncoder.encode(userCredentials.getPassword()));
+    newUser.setPassword(bCryptPasswordEncoder.encode(userCredentials.getPassword()));
 
-    userRepository.updateUser(userCredentials.getUsername(), userCredentials.getPassword());
-  }
+    userToUpdate.get().updateUser(newUser);
 
-  @Override
-  public void deleteUser(String username) {
-    UserCredentials userCredentials = userRepository.findByUsername(username);
-
-    userRepository.delete(userCredentials);
+    userRepository.save(userToUpdate.get());
   }
 
   /**
-   * Use {@link #updateUser(UserDetails)} instead
+   * Deletes given user
    *
-   * @param oldPassword
-   * @param newPassword
+   * @param username username of user to be deleted
    */
-  @Override
-  public void changePassword(String oldPassword, String newPassword) {}
+  public void deleteUser(String username) throws UserNotFoundException {
+    Optional<UserCredentials> userCredentials = userRepository.findByUsername(username);
+
+    if (userCredentials.isEmpty())
+      throw new UserNotFoundException(
+          String.format("User with given username: %s is not found!", username));
+
+    userRepository.delete(userCredentials.get());
+  }
 
   /**
-   * {@inheritDoc}
+   * Checks if user with given username already exists
    *
-   * <p><b> always returns {@code true} at the moment !!!
-   *
-   * @param username
-   * @return
+   * @param username username
+   * @return {@code true} if user with given username already exists, else {@code false}
    */
-  @Override
   public boolean userExists(String username) {
-    return true;
-  }
-
-  @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    UserCredentials userCredentials = userRepository.findByUsername(username);
-
-    if (userCredentials == null)
-      throw new UsernameNotFoundException("User with given username is not found: " + username);
-
-    return new User(
-        userCredentials.getUsername(),
-        userCredentials.getPassword(),
-        userCredentials.getAuthorities());
+    return userRepository.existsByUsername(username);
   }
 }
