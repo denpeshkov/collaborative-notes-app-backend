@@ -4,10 +4,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.Set;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJdbcTest
 @TestPropertySource("/bootstrap.yml")
@@ -17,8 +18,8 @@ class UserRepositoryTestIT {
 
   @Test
   void findByUsernameWhenNoUserExists() {
-    UserCredentials root = userRepository.findByUsername("root");
-    Assertions.assertNull(root);
+    Optional<UserCredentials> root = userRepository.findByUsername("root");
+    assertTrue(root.isEmpty());
   }
 
   @Test
@@ -26,18 +27,16 @@ class UserRepositoryTestIT {
     UserCredentials userCredentials = new UserCredentials("root", "root");
 
     userRepository.save(userCredentials);
-    UserCredentials userCredentials1 = userRepository.findByUsername("root");
-    Assertions.assertEquals(userCredentials, userCredentials1);
+    Optional<UserCredentials> userCredentials1 = userRepository.findByUsername("root");
+    assertTrue(userCredentials1.isPresent());
+    Assertions.assertEquals(userCredentials, userCredentials1.get());
 
-    userCredentials =
-        new UserCredentials(
-            "root1",
-            "root1",
-            Set.of(new SimpleGrantedAuthority("ADMIN"), new SimpleGrantedAuthority("USER")));
+    userCredentials = new UserCredentials("root1", "root1");
 
     userRepository.save(userCredentials);
     userCredentials1 = userRepository.findByUsername("root1");
-    Assertions.assertEquals(userCredentials, userCredentials1);
+    assertTrue(userCredentials1.isPresent());
+    Assertions.assertEquals(userCredentials, userCredentials1.get());
   }
 
   @Test
@@ -45,13 +44,36 @@ class UserRepositoryTestIT {
     UserCredentials userCredentials = new UserCredentials("root", "root");
 
     userRepository.save(userCredentials);
-    UserCredentials userCredentials1 = userRepository.findByUsername("root");
-    Assertions.assertEquals(userCredentials, userCredentials1);
+    Optional<UserCredentials> userCredentials1 = userRepository.findByUsername("root");
+    assertTrue(userCredentials1.isPresent());
+    Assertions.assertEquals(userCredentials, userCredentials1.get());
 
-    UserCredentials updatedUserCredentials = new UserCredentials("root", "root1");
+    UserCredentials updatedUserCredentials = new UserCredentials("root", "new_root");
+    userCredentials.updateUser(updatedUserCredentials);
 
-    userRepository.updateUser(
-        updatedUserCredentials.getUsername(), updatedUserCredentials.getPassword());
-    Assertions.assertEquals(updatedUserCredentials, userRepository.findByUsername("root"));
+    userRepository.save(userCredentials);
+    Assertions.assertEquals(updatedUserCredentials, userRepository.findByUsername("root").get());
+
+    userCredentials1.get().updateUser(updatedUserCredentials);
+
+    userRepository.save(userCredentials1.get());
+    Assertions.assertEquals(updatedUserCredentials, userRepository.findByUsername("root").get());
+  }
+
+  @Test
+  void parametersValidation() {
+    assertThrows(IllegalArgumentException.class, () -> userRepository.save(null));
+  }
+
+  @Test
+  void deleleteUser() {
+    UserCredentials userCredentials = new UserCredentials("root", "root");
+    userRepository.save(userCredentials);
+
+    Assertions.assertTrue(userRepository.existsByUsername(userCredentials.getUsername()));
+
+    userRepository.delete(userCredentials);
+
+    assertFalse(userRepository.existsByUsername(userCredentials.getUsername()));
   }
 }
