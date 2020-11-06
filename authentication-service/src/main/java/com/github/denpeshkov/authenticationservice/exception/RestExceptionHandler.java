@@ -5,7 +5,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,25 +20,6 @@ import java.util.Map;
 // don't need to create them
 @RestControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
-
-  /**
-   * Customize the response for {@link AccessDeniedException}.
-   *
-   * <p>This method delegates to {@link #handleExceptionInternal}.
-   *
-   * @param exception the exception
-   * @return a {@link ResponseEntity} instance
-   */
-  @ExceptionHandler(AccessDeniedException.class)
-  public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException exception) {
-    RestExceptionResponse exceptionResponse =
-        new RestExceptionResponse(
-            HttpStatus.FORBIDDEN, "User doesn't have required authorities", exception);
-
-    return handleExceptionInternal(
-        exception, exceptionResponse, null, exceptionResponse.getStatus(), null);
-  }
-
   /**
    * Customize the response for {@link AuthenticationException}.
    *
@@ -56,6 +35,59 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatus.UNAUTHORIZED,
             "Token for an authentication request or for an authenticated principal is invalid",
             exception);
+
+    return handleExceptionInternal(
+        exception, exceptionResponse, null, exceptionResponse.getStatus(), null);
+  }
+
+  /**
+   * Customize the response for {@link UserAlreadyExistsException}.
+   *
+   * <p>This method delegates to {@link #handleExceptionInternal}.
+   *
+   * @param exception the exception
+   * @return a {@link ResponseEntity} instance
+   */
+  @ExceptionHandler(UserAlreadyExistsException.class)
+  public ResponseEntity<Object> handleUserAlreadyExistsException(
+      UserAlreadyExistsException exception) {
+    RestExceptionResponse exceptionResponse =
+        new RestExceptionResponse(HttpStatus.UNAUTHORIZED, "User already exists!", exception);
+
+    return handleExceptionInternal(
+        exception, exceptionResponse, null, exceptionResponse.getStatus(), null);
+  }
+
+  /**
+   * Customize the response for {@link UserNotFoundException}.
+   *
+   * <p>This method delegates to {@link #handleExceptionInternal}.
+   *
+   * @param exception the exception
+   * @return a {@link ResponseEntity} instance
+   */
+  @ExceptionHandler(UserNotFoundException.class)
+  public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException exception) {
+    RestExceptionResponse exceptionResponse =
+        new RestExceptionResponse(HttpStatus.UNAUTHORIZED, "User not found!", exception);
+
+    return handleExceptionInternal(
+        exception, exceptionResponse, null, exceptionResponse.getStatus(), null);
+  }
+
+  /**
+   * Customize the response for {@link UserNotFoundException}.
+   *
+   * <p>This method delegates to {@link #handleExceptionInternal}.
+   *
+   * @param exception the exception
+   * @return a {@link ResponseEntity} instance
+   */
+  @ExceptionHandler(IncorrectPasswordException.class)
+  public ResponseEntity<Object> handleIncorrectPasswordException(
+      IncorrectPasswordException exception) {
+    RestExceptionResponse exceptionResponse =
+        new RestExceptionResponse(HttpStatus.UNAUTHORIZED, "Incorrect password!", exception);
 
     return handleExceptionInternal(
         exception, exceptionResponse, null, exceptionResponse.getStatus(), null);
