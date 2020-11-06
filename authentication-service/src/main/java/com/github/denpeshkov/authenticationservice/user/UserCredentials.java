@@ -5,15 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.validation.constraints.NotBlank;
-import java.util.Collections;
 import java.util.Objects;
-import java.util.Set;
 
 /** Represent user's credentials during authentication and registration */
 @JsonIgnoreProperties(ignoreUnknown = true, allowGetters = true)
@@ -27,23 +22,9 @@ public class UserCredentials {
   /** user's password */
   @NotBlank(message = "password should not be empty")
   private String password;
-  /**
-   * user's roles
-   *
-   * <p><b>not used at the moment !!! so {@link Transient}
-   */
-  @Transient private Set<SimpleGrantedAuthority> authorities;
 
-  /**
-   * Creates entity from {@link UserDetails} instance to work with Spring Security abstractions
-   *
-   * @param userDetails {@link UserDetails} instance
-   */
-  public UserCredentials(UserDetails userDetails) {
-    username = userDetails.getUsername();
-    password = userDetails.getPassword();
-    authorities = (Set<SimpleGrantedAuthority>) userDetails.getAuthorities();
-  }
+  // JPA spec
+  public UserCredentials() {}
 
   @JsonCreator
   @PersistenceConstructor // constructor used to persist entity
@@ -51,26 +32,23 @@ public class UserCredentials {
       @JsonProperty("username") String username, @JsonProperty("password") String password) {
     this.username = username;
     this.password = password;
-    authorities = Collections.emptySet();
   }
 
-  public UserCredentials(
-      String username, String password, Set<SimpleGrantedAuthority> authorities) {
+  public UserCredentials(UserCredentials userCredentials) {
+    username = userCredentials.getUsername();
+    password = userCredentials.getPassword();
+  }
+
+  // fluent API
+  public UserCredentials setUsername(String username) {
     this.username = username;
+    return this;
+  }
+
+  // fluent API
+  public UserCredentials setPassword(String password) {
     this.password = password;
-    this.authorities = authorities;
-  }
-
-  public void setUsername(String username) {
-    this.username = username;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
-  }
-
-  public void setAuthorities(Set<SimpleGrantedAuthority> authorities) {
-    this.authorities = authorities;
+    return this;
   }
 
   public String getUsername() {
@@ -81,10 +59,17 @@ public class UserCredentials {
     return password;
   }
 
-  public Set<SimpleGrantedAuthority> getAuthorities() {
-    return authorities;
+  public void updateUser(UserCredentials userCredentials) {
+    this.username = userCredentials.username;
+    this.password = userCredentials.password;
   }
 
+  /**
+   * Users are equal if their usernames are equals
+   *
+   * @param o user
+   * @return {@code true} if users are equal, otherwise {@code false}
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -107,8 +92,6 @@ public class UserCredentials {
         + ", password='"
         + password
         + '\''
-        + ", authorities="
-        + authorities
         + '}';
   }
 }
