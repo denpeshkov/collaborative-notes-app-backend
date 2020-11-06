@@ -1,0 +1,6 @@
+security:
+  jwt:
+    header: 'Authorization' #JWT header
+    schema: 'Bearer' #JWT schema
+    expirationPeriod: '1d' #JWT expiration duration
+    secret: 'secrettousewithjwttokenforautentication' #JWT secret
