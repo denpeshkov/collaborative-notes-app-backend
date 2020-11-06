@@ -25,6 +25,9 @@ class UserServiceTest {
   @Spy BCryptPasswordEncoder passwordEncoder;
   @InjectMocks UserService userService;
 
+  private final ArgumentCaptor<UserCredentials> userCredentialsArgumentCaptor =
+      ArgumentCaptor.forClass(UserCredentials.class);
+
   @Test
   void getUser() throws UserNotFoundException, IncorrectPasswordException {
     UserCredentials user = new UserCredentials("root", "root");
@@ -46,6 +49,11 @@ class UserServiceTest {
     Assertions.assertDoesNotThrow(
         () -> userService.createUser(new UserCredentials("root", "root")));
 
+    verify(userRepository).save(userCredentialsArgumentCaptor.capture());
+
+    Assertions.assertTrue(
+        passwordEncoder.matches("root", userCredentialsArgumentCaptor.getValue().getPassword()));
+
     when(userRepository.existsByUsername("root")).thenReturn(true);
     UserAlreadyExistsException userAlreadyExistsException =
         Assertions.assertThrows(
@@ -58,9 +66,6 @@ class UserServiceTest {
 
   @Test
   void updateUser() throws UserNotFoundException {
-    ArgumentCaptor<UserCredentials> userCredentialsArgumentCaptor =
-        ArgumentCaptor.forClass(UserCredentials.class);
-
     when(userRepository.findByUsername("root"))
         .thenReturn(Optional.of(new UserCredentials("root", "root")));
 
