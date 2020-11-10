@@ -1,39 +1,31 @@
 package com.github.denpeshkov.authenticationservice.user;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.boot.test.json.JacksonTester;
 
-import java.util.Set;
+import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserCredentialsTest {
-  private static final ObjectMapper mapper = new ObjectMapper();
-  private static String request;
+  private JacksonTester<UserCredentials> jacksonTester;
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   @BeforeEach
-  void setUp() {
-    request = "{\"username\":\"aaa\", \"password\":\"aaa\"}";
+  void beforeEach() {
+    JacksonTester.initFields(this, objectMapper);
   }
 
   @Test
-  void testDesiralization() throws JsonProcessingException {
-    UserCredentials userCredentials = mapper.readValue(request, UserCredentials.class);
+  void testSerializationWithoutAuthorities() throws IOException {
+    UserCredentials userCredentialsWithoutAuthorities = new UserCredentials("root", "root");
 
-    System.out.println(userCredentials);
-  }
+    String userCredentialsJson = jacksonTester.write(userCredentialsWithoutAuthorities).getJson();
 
-  @Test
-  void testSerialization() throws JsonProcessingException {
-    UserCredentials userCredentials =
-        new UserCredentials(
-            "aa",
-            "aaaaa",
-            Set.of(new SimpleGrantedAuthority("ROLE_1"), new SimpleGrantedAuthority("ROLE_2")));
+    UserCredentials userCredentials = jacksonTester.parse(userCredentialsJson).getObject();
 
-    System.out.println(userCredentials);
-
-    System.out.println(mapper.writeValueAsString(userCredentials));
+    assertEquals(userCredentialsWithoutAuthorities, userCredentials);
   }
 }
