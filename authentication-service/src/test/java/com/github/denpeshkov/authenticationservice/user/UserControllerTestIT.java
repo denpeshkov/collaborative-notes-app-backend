@@ -3,6 +3,7 @@ package com.github.denpeshkov.authenticationservice.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.denpeshkov.authenticationservice.exception.RestExceptionHandler;
 import com.github.denpeshkov.authenticationservice.exception.UserAlreadyExistsException;
+import com.github.denpeshkov.authenticationservice.exception.UserNotFoundException;
 import com.github.denpeshkov.authenticationservice.security.JWTService;
 import com.github.denpeshkov.authenticationservice.security.SecurityConfig;
 import com.github.denpeshkov.commons.security.jwt.JwtConfig;
@@ -22,8 +23,6 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 
-import java.time.Period;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
@@ -39,9 +38,9 @@ class UserControllerTestIT {
   private UserService userService;
 
   @MockBean private JwtConfig jwtConfig;
+  @MockBean private JWTService jwtService;
 
   @Autowired private MockMvc mockMvc;
-  @Autowired private JWTService jwtService;
   @Captor ArgumentCaptor<UserCredentials> userCaptor;
 
   // used to emulate browser send JSON requests
@@ -150,10 +149,7 @@ class UserControllerTestIT {
   void loginUser() throws Exception {
     UserCredentials userCredentials = new UserCredentials("root", "root");
 
-    when(jwtConfig.getSecret()).thenReturn("secrettousewithjwttokenforautentication");
-    when(jwtConfig.getExpirationPeriod()).thenReturn(Period.ofDays(1));
-    when(jwtConfig.getHeader()).thenReturn("Authorization");
-    when(jwtConfig.getSchema()).thenReturn("Bearer");
+    when(jwtService.createToken(any())).thenReturn("some_valid_token");
 
     mockMvc
         .perform(
@@ -161,7 +157,37 @@ class UserControllerTestIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userCredentials)))
         .andExpect(status().isOk())
-        .andExpect(MockMvcResultMatchers.header().exists("Authorization"))
+        .andExpect(MockMvcResultMatchers.content().string("some_valid_token"))
+        .andDo(print());
+  }
+
+  @Test
+  void loginUser_WhenUserAlreadyLogged() throws Exception {
+    UserCredentials userCredentials = new UserCredentials("root", "root");
+
+    mockMvc
+        .perform(
+            post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userCredentials))
+                .header("Authorization", "aa"))
+        .andDo(print());
+  }
+
+  @Test
+  void loginUser_WhenUserDoesntExist() throws Exception {
+    UserCredentials userCredentials = new UserCredentials("root", "root");
+
+    doThrow(new UserNotFoundException("User with given username: root is not found!"))
+        .when(userService)
+        .verifyUser(any());
+
+    mockMvc
+        .perform(
+            post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userCredentials)))
+        .andExpect(status().isUnauthorized())
         .andDo(print());
   }
 

@@ -4,7 +4,6 @@ import com.github.denpeshkov.authenticationservice.exception.IncorrectPasswordEx
 import com.github.denpeshkov.authenticationservice.exception.UserAlreadyExistsException;
 import com.github.denpeshkov.authenticationservice.exception.UserNotFoundException;
 import com.github.denpeshkov.authenticationservice.security.JWTService;
-import com.github.denpeshkov.commons.security.jwt.JwtConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,20 +11,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestController
 public class UserController {
   private final UserService userService;
   private final JWTService jwtService;
-  private final JwtConfig jwtConfig;
 
   @Autowired
-  public UserController(UserService userService, JWTService jwtService, JwtConfig jwtConfig) {
+  public UserController(UserService userService, JWTService jwtService) {
     this.userService = userService;
     this.jwtService = jwtService;
-    this.jwtConfig = jwtConfig;
   }
 
   @PostMapping("/signup")
@@ -35,8 +31,9 @@ public class UserController {
     userService.createUser(userCredentials);
   }
 
-  @PostMapping("/login")
-  void loginUser(@RequestBody @Valid UserCredentials userCredentials, HttpServletResponse response)
+  @PostMapping(path = "/login", headers = "!Authorization")
+  @ResponseStatus(HttpStatus.OK)
+  String loginUser(@RequestBody @Valid UserCredentials userCredentials)
       throws UserNotFoundException, IncorrectPasswordException {
     try {
       userService.verifyUser(userCredentials);
@@ -48,8 +45,6 @@ public class UserController {
           e);
     }
 
-    String token = jwtService.createToken(userCredentials);
-
-    response.setHeader(jwtConfig.getHeader(), jwtConfig.getSchema() + " " + token);
+    return jwtService.createToken(userCredentials);
   }
 }
