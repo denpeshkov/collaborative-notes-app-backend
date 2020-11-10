@@ -24,7 +24,7 @@ public class UserController {
     this.jwtService = jwtService;
   }
 
-  @PostMapping("/signup")
+  @PostMapping(path = "/signup", headers = "!Authorization")
   @ResponseStatus(HttpStatus.CREATED)
   void registerUser(@RequestBody @Valid UserCredentials userCredentials)
       throws UserAlreadyExistsException {

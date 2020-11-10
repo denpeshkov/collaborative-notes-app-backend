@@ -146,6 +146,20 @@ class UserControllerTestIT {
   }
 
   @Test
+  void registerUser_WhenUserAlreadyLogged() throws Exception {
+    UserCredentials userCredentials = new UserCredentials("root", "root");
+
+    mockMvc
+            .perform(
+                    post("/signup")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(userCredentials))
+                            .header("Authorization", "jwt_token"))
+            .andExpect(status().isNotFound())
+            .andDo(print());
+  }
+
+  @Test
   void loginUser() throws Exception {
     UserCredentials userCredentials = new UserCredentials("root", "root");
 
@@ -170,7 +184,8 @@ class UserControllerTestIT {
             post("/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userCredentials))
-                .header("Authorization", "aa"))
+                .header("Authorization", "jwt_token"))
+        .andExpect(status().isNotFound())
         .andDo(print());
   }
 
