@@ -29,7 +29,7 @@ class UserServiceTest {
       ArgumentCaptor.forClass(UserCredentials.class);
 
   @Test
-  void getUser() throws UserNotFoundException, IncorrectPasswordException {
+  void getUser() throws UserNotFoundException {
     UserCredentials user = new UserCredentials("root", "root");
 
     when(userRepository.findByUsername("root"))
@@ -44,7 +44,7 @@ class UserServiceTest {
   }
 
   @Test
-  void createUser() throws UserAlreadyExistsException {
+  void createUser() {
     when(userRepository.existsByUsername("root")).thenReturn(false);
     Assertions.assertDoesNotThrow(
         () -> userService.createUser(new UserCredentials("root", "root")));

@@ -39,7 +39,6 @@ class UserControllerTestIT {
 
   @MockBean private JwtConfig jwtConfig;
   @MockBean private JWTService jwtService;
-
   @Autowired private MockMvc mockMvc;
   @Captor ArgumentCaptor<UserCredentials> userCaptor;
 
