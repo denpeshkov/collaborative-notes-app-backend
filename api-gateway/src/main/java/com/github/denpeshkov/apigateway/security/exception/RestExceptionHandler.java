@@ -1,14 +1,15 @@
 package com.github.denpeshkov.apigateway.security.exception;
 
 import com.github.denpeshkov.commons.exception.RestExceptionResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import java.nio.file.AccessDeniedException;
 
 /** Handles all REST exceptions */
 // Extends from ResponseEntityExceptionHandler to inherit basic exceptions handlers, so we
@@ -17,15 +18,17 @@ import java.nio.file.AccessDeniedException;
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
   /**
-   * Customize the response for {@link AccessDeniedException}.
+   * Customize the response for {@link org.springframework.security.access.AccessDeniedException
+   * AccessDeniedException}.
    *
    * <p>This method delegates to {@link #handleExceptionInternal}.
    *
    * @param exception the exception
    * @return a {@link ResponseEntity} instance
    */
-  @ExceptionHandler(AccessDeniedException.class)
-  protected ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException exception) {
+  @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+  protected ResponseEntity<Object> handleAccessDeniedException(
+      org.springframework.security.access.AccessDeniedException exception) {
     RestExceptionResponse exceptionResponse =
         new RestExceptionResponse(
             HttpStatus.FORBIDDEN, "User doesn't have required authorities", exception);
@@ -48,7 +51,23 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     RestExceptionResponse exceptionResponse =
         new RestExceptionResponse(
             HttpStatus.UNAUTHORIZED,
-            "Token for an authentication request or for an authenticated principal is invalid",
+            "There was an error during authentication process!",
+            exception);
+
+    return handleExceptionInternal(
+        exception, exceptionResponse, null, exceptionResponse.getStatus(), null);
+  }
+
+  @Override
+  protected ResponseEntity<Object> handleNoHandlerFoundException(
+      NoHandlerFoundException exception,
+      HttpHeaders headers,
+      HttpStatus status,
+      WebRequest request) {
+    RestExceptionResponse exceptionResponse =
+        new RestExceptionResponse(
+            HttpStatus.NOT_FOUND,
+            "No handler found! Check URL and headers of the request!",
             exception);
 
     return handleExceptionInternal(
