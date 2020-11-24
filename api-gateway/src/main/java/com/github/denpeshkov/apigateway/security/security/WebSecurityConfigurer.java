@@ -3,7 +3,6 @@ package com.github.denpeshkov.apigateway.security.security;
 import com.github.denpeshkov.commons.security.jwt.JwtConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -37,7 +36,7 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
         .addFilterAfter(
             new JwtTokenAuthenticationFilter(jwtConfig), UsernamePasswordAuthenticationFilter.class)
         .authorizeRequests()
-        .antMatchers(HttpMethod.POST, "/authentication-service")
+        .antMatchers("/authentication-service/*")
         .permitAll()
         .anyRequest()
         .authenticated();
