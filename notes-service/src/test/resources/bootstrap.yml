@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: notes-service # name of service
+  h2:
+    console:
+      enabled: true
+  cloud:
+    config:
+      enabled: false # disable Spring Cloud Config for tests
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*" # expose all actuator endpoints
