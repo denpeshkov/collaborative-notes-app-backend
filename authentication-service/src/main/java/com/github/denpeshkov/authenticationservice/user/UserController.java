@@ -6,6 +6,7 @@ import com.github.denpeshkov.authenticationservice.exception.UserNotFoundExcepti
 import com.github.denpeshkov.authenticationservice.security.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @RestController
+@CrossOrigin
 public class UserController {
   private final UserService userService;
   private final JWTService jwtService;
