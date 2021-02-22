@@ -149,13 +149,13 @@ class UserControllerTestIT {
     UserCredentials userCredentials = new UserCredentials("root", "root");
 
     mockMvc
-            .perform(
-                    post("/signup")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(userCredentials))
-                            .header("Authorization", "jwt_token"))
-            .andExpect(status().isNotFound())
-            .andDo(print());
+        .perform(
+            post("/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userCredentials))
+                .header("Authorization", "jwt_token"))
+        .andExpect(status().isNotFound())
+        .andDo(print());
   }
 
   @Test
@@ -170,7 +170,7 @@ class UserControllerTestIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userCredentials)))
         .andExpect(status().isOk())
-        .andExpect(MockMvcResultMatchers.content().string("some_valid_token"))
+        .andExpect(MockMvcResultMatchers.content().json("{'jwtToken':'some_valid_token'}"))
         .andDo(print());
   }
 

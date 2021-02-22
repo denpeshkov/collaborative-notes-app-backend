@@ -35,7 +35,7 @@ public class UserController {
 
   @PostMapping(path = "/login", headers = "!Authorization")
   @ResponseStatus(HttpStatus.OK)
-  String loginUser(@RequestBody @Valid UserCredentials userCredentials)
+  JWTToken loginUser(@RequestBody @Valid UserCredentials userCredentials)
       throws UserNotFoundException, IncorrectPasswordException {
     try {
       userService.verifyUser(userCredentials);
@@ -47,6 +47,25 @@ public class UserController {
           e);
     }
 
-    return jwtService.createToken(userCredentials);
+    String token = jwtService.createToken(userCredentials);
+    return new JWTToken(token);
+  }
+}
+
+class JWTToken {
+  private String jwtToken;
+
+  public JWTToken() {}
+
+  public JWTToken(String jwtToken) {
+    this.jwtToken = jwtToken;
+  }
+
+  public String getJwtToken() {
+    return jwtToken;
+  }
+
+  public void setJwtToken(String jwtToken) {
+    this.jwtToken = jwtToken;
   }
 }
