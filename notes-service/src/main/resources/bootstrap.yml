@@ -5,9 +5,7 @@ spring:
     config:
       uri: http://localhost:8888/ # url of config-service
       fail-fast: true # fails if cannot connect to config-service
-      name: service-registry-client, jwt-security # what properties files to load
-  profiles:
-    active: eureka # active profiles
+      name: notes-service, service-registry-client, jwt-security # what properties files to load
   h2:
     console:
       enabled: true
