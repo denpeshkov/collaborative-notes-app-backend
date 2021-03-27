@@ -10,6 +10,6 @@ public class DtoConverter {
   }
 
   public static NoteAttributes convert(Note note) {
-    return new NoteAttributes(note.getTitle());
+    return new NoteAttributes(note.getTitle(), note.getId());
   }
 }

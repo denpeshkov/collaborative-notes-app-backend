@@ -10,7 +10,6 @@ import com.github.denpeshkov.notesservice.dto.NoteAttributes;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,16 +28,18 @@ public class NotesControllerTestIT {
     when(notesService.getAllNotes())
         .thenReturn(
             List.of(
-                new NoteAttributes("title1"),
-                new NoteAttributes("title2"),
-                new NoteAttributes("title3")));
+                new NoteAttributes("title1", 1L),
+                new NoteAttributes("title2", 2L),
+                new NoteAttributes("title3", 3L)));
 
     mockMvc
         .perform(get("/api/notes"))
         .andExpect(status().isOk())
         .andExpect(
             content()
-                .json("[{\"title\":\"title1\"},{\"title\":\"title2\"},{\"title\":\"title3\"}]"))
+                .json(
+                    "[{\"title\":\"title1\",\"id\":1},{\"title\":\"title2\",\"id\":2},{\"title\":\"title3\",\"id\":3}]",
+                    true))
         .andDo(print());
   }
 }

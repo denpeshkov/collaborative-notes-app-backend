@@ -2,6 +2,8 @@ package com.github.denpeshkov.notesservice;
 
 import com.github.denpeshkov.notesservice.dto.DtoConverter;
 import com.github.denpeshkov.notesservice.dto.NoteAttributes;
+import com.github.denpeshkov.notesservice.exception.NoteAlreadyExistsException;
+import com.github.denpeshkov.notesservice.exception.NoteNotExistsException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
@@ -33,16 +35,24 @@ public class NotesController {
     return notesService.getAllNotes();
   }
 
+  @GetMapping("/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  @ApiOperation("Вернуть записку по id")
+  public Note getNote(@PathVariable @ApiParam("Id записки") Long id) throws NoteNotExistsException {
+    return notesService.getNote(id);
+  }
+
   @PostMapping
   @ApiOperation("Добавить записку")
-  public void addNote(@RequestBody NoteAttributes noteDto) {
+  public void addNote(@RequestBody NoteAttributes noteDto) throws NoteAlreadyExistsException {
     Note note = DtoConverter.convert(noteDto);
     notesService.addNote(note);
   }
 
   @DeleteMapping("/{id}")
   @ApiOperation("Удалить записку")
-  public void deleteNote(@PathVariable @ApiParam("Id записки для удления") Long id) {
+  public void deleteNote(@PathVariable @ApiParam("Id записки для удаления") Long id)
+      throws NoteNotExistsException {
     notesService.deleteNote(id);
   }
 }
