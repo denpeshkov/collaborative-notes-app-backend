@@ -1,6 +1,8 @@
 package com.github.denpeshkov.notesservice;
 
 import com.github.denpeshkov.notesservice.dto.NoteAttributes;
+import com.github.denpeshkov.notesservice.exception.NoteAlreadyExistsException;
+import com.github.denpeshkov.notesservice.exception.NoteNotExistsException;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -21,20 +23,28 @@ public class NotesService {
     return notesRepository.findAllBy();
   }
 
+  public Note getNote(Long id) throws NoteNotExistsException {
+    if (!notesRepository.existsById(id))
+      throw new NoteNotExistsException(String.format("Note with id=%d not exists", id));
+    return notesRepository.findById(id).get();
+  }
+
   /**
    * Adds note
    *
    * @param note note
-   * @return {@code true} if saved (new node added) {@code false} if not saved (duplicate node)
    */
-  public boolean addNote(Note note) {
-    if (notesRepository.existsById(note.getId())) return false;
+  public void addNote(Note note) throws NoteAlreadyExistsException {
+    if (notesRepository.existsById(note.getId()))
+      throw new NoteAlreadyExistsException(
+          String.format("Note with id=%d already exits", note.getId()));
 
     notesRepository.save(note);
-    return true;
   }
 
-  public void deleteNote(long id) {
+  public void deleteNote(long id) throws NoteNotExistsException {
+    if (!notesRepository.existsById(id))
+      throw new NoteNotExistsException(String.format("Note with id=%d not exists", id));
     notesRepository.deleteById(id);
   }
 }

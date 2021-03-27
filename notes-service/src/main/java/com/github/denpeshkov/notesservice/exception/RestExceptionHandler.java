@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -18,6 +19,25 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 // don't need to create them
 @RestControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+
+  @ExceptionHandler(NoteAlreadyExistsException.class)
+  public ResponseEntity<Object> handleAuthenticationException(
+      NoteAlreadyExistsException exception) {
+    RestExceptionResponse exceptionResponse =
+        new RestExceptionResponse(HttpStatus.CONFLICT, "Note already exists!", exception);
+
+    return handleExceptionInternal(
+        exception, exceptionResponse, null, exceptionResponse.getStatus(), null);
+  }
+
+  @ExceptionHandler(NoteNotExistsException.class)
+  public ResponseEntity<Object> handleAuthenticationException(NoteNotExistsException exception) {
+    RestExceptionResponse exceptionResponse =
+        new RestExceptionResponse(HttpStatus.CONFLICT, "Note not exists!", exception);
+
+    return handleExceptionInternal(
+        exception, exceptionResponse, null, exceptionResponse.getStatus(), null);
+  }
 
   @Override
   protected ResponseEntity<Object> handleMethodArgumentNotValid(
