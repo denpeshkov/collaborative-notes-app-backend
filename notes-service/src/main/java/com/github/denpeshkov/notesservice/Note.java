@@ -13,7 +13,7 @@ public class Note {
   private String text;
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   public Note() {}
