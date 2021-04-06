@@ -48,4 +48,13 @@ public class Note {
   public void setText(String text) {
     this.text = text;
   }
+
+  @Override
+  public String toString() {
+    return "Note{" +
+        "title='" + title + '\'' +
+        ", text='" + text + '\'' +
+        ", id=" + id +
+        '}';
+  }
 }

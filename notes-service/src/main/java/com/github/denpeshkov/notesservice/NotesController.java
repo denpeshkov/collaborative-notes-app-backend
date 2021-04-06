@@ -43,7 +43,7 @@ public class NotesController {
 
   @PostMapping
   @ApiOperation("Добавить записку")
-  public void addNote(@RequestBody NoteAttributes noteDto) throws NoteAlreadyExistsException {
+  public void addNote(@RequestBody NoteAttributes noteDto) {
     Note note = DtoConverter.convert(noteDto);
     notesService.addNote(note);
   }
