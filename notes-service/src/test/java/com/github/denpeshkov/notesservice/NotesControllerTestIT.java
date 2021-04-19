@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.github.denpeshkov.notesservice.dto.NoteAttributes;
-import com.github.denpeshkov.notesservice.exception.NoteNotExistsException;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -68,16 +67,20 @@ public class NotesControllerTestIT {
 
   @Test
   void addNote() throws Exception {
+    when(notesService.saveNote(any())).thenReturn(1L);
+
     mockMvc
         .perform(
             post("/api/notes")
                 .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("UTF-8")
                 .content("{\"title\":\"title1\"}")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
+        .andExpect(content().json("1"))
         .andDo(print());
 
-    verify(notesService).addNote(noteCaptor.capture());
+    verify(notesService).saveNote(noteCaptor.capture());
 
     Note note = noteCaptor.getValue();
 

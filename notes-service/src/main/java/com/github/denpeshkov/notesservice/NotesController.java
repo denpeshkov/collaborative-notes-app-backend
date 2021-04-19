@@ -2,17 +2,16 @@ package com.github.denpeshkov.notesservice;
 
 import com.github.denpeshkov.notesservice.dto.DtoConverter;
 import com.github.denpeshkov.notesservice.dto.NoteAttributes;
-import com.github.denpeshkov.notesservice.exception.NoteAlreadyExistsException;
 import com.github.denpeshkov.notesservice.exception.NoteNotExistsException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -43,9 +42,19 @@ public class NotesController {
 
   @PostMapping
   @ApiOperation("Добавить записку")
-  public void addNote(@RequestBody NoteAttributes noteDto) {
+  // TODO should return id
+  public long addNote(@RequestBody NoteAttributes noteDto) {
     Note note = DtoConverter.convert(noteDto);
-    notesService.addNote(note);
+    return notesService.saveNote(note);
+  }
+
+  @PutMapping("/{id}")
+  public void editNote(@RequestBody Note note, @PathVariable @ApiParam("Id записки") Long id)
+      throws NoteNotExistsException {
+    Note existingNote = notesService.getNote(id);
+    existingNote.setText(note.getText());
+    existingNote.setTitle(note.getTitle());
+    notesService.saveNote(existingNote);
   }
 
   @DeleteMapping("/{id}")
