@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @RestController
-@CrossOrigin
 public class UserController {
   private final UserService userService;
   private final JWTService jwtService;
