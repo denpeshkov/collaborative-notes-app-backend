@@ -34,12 +34,9 @@ public class NotesService {
    *
    * @param note note
    */
-  public void addNote(Note note) throws NoteAlreadyExistsException {
-    if (notesRepository.existsById(note.getId()))
-      throw new NoteAlreadyExistsException(
-          String.format("Note with id=%d already exits", note.getId()));
-
-    notesRepository.save(note);
+  public long saveNote(Note note) {
+    Note savedNote = notesRepository.save(note);
+    return note.getId();
   }
 
   public void deleteNote(long id) throws NoteNotExistsException {

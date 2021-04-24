@@ -1,5 +1,7 @@
 package com.github.denpeshkov.notesservice;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -7,13 +9,15 @@ import javax.persistence.Id;
 
 /** Note entity */
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Note {
 
   private String title;
   private String text;
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @JsonIgnore
   private Long id;
 
   public Note() {}
@@ -45,5 +49,10 @@ public class Note {
 
   public void setText(String text) {
     this.text = text;
+  }
+
+  @Override
+  public String toString() {
+    return "Note{" + "title='" + title + '\'' + ", text='" + text + '\'' + ", id=" + id + '}';
   }
 }
