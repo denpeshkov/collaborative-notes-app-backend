@@ -42,7 +42,6 @@ public class NotesController {
 
   @PostMapping
   @ApiOperation("Добавить записку")
-  // TODO should return id
   public long addNote(@RequestBody NoteAttributes noteDto) {
     Note note = DtoConverter.convert(noteDto);
     return notesService.saveNote(note);
@@ -52,8 +51,8 @@ public class NotesController {
   public void editNote(@RequestBody Note note, @PathVariable @ApiParam("Id записки") Long id)
       throws NoteNotExistsException {
     Note existingNote = notesService.getNote(id);
-    existingNote.setText(note.getText());
-    existingNote.setTitle(note.getTitle());
+    if (note.getTitle() != null) existingNote.setTitle(note.getTitle());
+    if (note.getText() != null) existingNote.setText(note.getText());
     notesService.saveNote(existingNote);
   }
 

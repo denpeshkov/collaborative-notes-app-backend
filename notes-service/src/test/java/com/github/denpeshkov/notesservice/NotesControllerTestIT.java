@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -86,6 +87,34 @@ public class NotesControllerTestIT {
 
     Assertions.assertNull(note.getId());
     Assertions.assertEquals(note.getTitle(), "title1");
+
+    System.out.println(note);
+  }
+
+  @Test
+  void editNote() throws Exception {
+    when(notesService.saveNote(any())).thenReturn(1L);
+    Note note1 = new Note("oldTitle", "Some text from old note");
+    note1.setId(1L);
+    when(notesService.getNote(1L)).thenReturn(note1);
+
+    mockMvc
+        .perform(
+            put("/api/notes/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("UTF-8")
+                .content("{\"title\":\"new title\"}")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andDo(print());
+
+    verify(notesService).saveNote(noteCaptor.capture());
+
+    Note note = noteCaptor.getValue();
+
+    Assertions.assertEquals(note.getId(), 1L);
+    Assertions.assertEquals(note.getTitle(), "new title");
+    Assertions.assertEquals(note.getText(), "Some text from old note");
 
     System.out.println(note);
   }
