@@ -49,6 +49,7 @@
         <module>api-gateway</module>
         <module>authentication-service</module>
         <module>notes-service</module>
+        <module>automerge-service</module>
     </modules>
 
 </project>
