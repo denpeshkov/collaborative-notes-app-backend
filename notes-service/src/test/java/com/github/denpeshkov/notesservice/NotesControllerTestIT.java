@@ -17,15 +17,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(NotesController.class)
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
 public class NotesControllerTestIT {
   @MockBean NotesService notesService;
 
@@ -103,7 +103,7 @@ public class NotesControllerTestIT {
             put("/api/notes/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
-                .content("{\"title\":\"new title\"}")
+                .content("{\"title\":\"new title\",\"id\":1}")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andDo(print());
