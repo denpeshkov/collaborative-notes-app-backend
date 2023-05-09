@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS billionaires;
+
+CREATE TABLE USER_CREDENTIALS (
+  id int AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(250) NOT NULL,
+  password VARCHAR(250) NOT NULL
+);
+
+INSERT INTO USER_CREDENTIALS (username, password) VALUES
+  ('Sam','000'),
+  ('Bill', '11111ffrr1_ss')

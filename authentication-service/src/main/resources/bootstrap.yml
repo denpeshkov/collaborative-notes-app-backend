@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: authentication-service # name of service
+  cloud:
+    config:
+      uri: http://localhost:8888/ # url of config-service
+      fail-fast: true # fails if cannot connect to config-service
+      name: authentication-service,  service-registry-client, jwt-security # what properties files to load
+  profiles:
+    active: test, eureka # active profiles
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
